@@ -60,59 +60,66 @@ namespace Talent.Services.Profile.Domain.Services
             var cvUrl = ""; //Initialize the cvUrl variable
             var ProfilePhotoUrl = ""; //Initialize the ProfilePhotoUrl variable
 
-            if (profile != null)
+            try
             {
-                videoUrl = string.IsNullOrWhiteSpace(profile.VideoName) //Check if the videoName is null or empty
-                          ? "" //If it is null or empty, set the videoUrl to empty
-                          : await _fileService.GetFileURL(profile.VideoName, FileType.UserVideo); //If it is not null or empty, get the videoUrl from the fileService
-                cvUrl = string.IsNullOrWhiteSpace(profile.CvName) //Check if the cvName is null or empty
-                          ? "" //If it is null or empty, set the cvUrl to empty
-                          : await _fileService.GetFileURL(profile.CvName, FileType.UserCV); //If it is not null or empty, get the cvUrl from the fileService
-                ProfilePhotoUrl = string.IsNullOrWhiteSpace(profile.ProfilePhoto) //Check if the ProfilePhoto is null or empty
-                            ? "" //If it is null or empty, set the ProfilePhotoUrl to empty
-                            : await _fileService.GetFileURL(profile.ProfilePhoto, FileType.ProfilePhoto);
-                //: profile.ProfilePhotoUrl; //If it is not null or empty, get the ProfilePhotoUrl from the fileService
-
-                var skills = profile.Skills.Select(x => ViewModelFromSkill(x)).ToList(); //Get the skills from the profile and convert them to a list of AddSkillViewModel
-                var languages = profile.Languages.Select(x => ViewModelFromLanguage(x, Id)).ToList(); //Get the languages from the profile and convert them to a list of AddLanguageViewModel
-                var education = profile.Education.Select(x => ViewModelFromEducation(x)).ToList(); //Get the education from the profile and convert them to a list of AddEducationViewModel
-                var certifications = profile.Certifications.Select(x => ViewModelFromCertification(x)).ToList(); //Get the certifications from the profile and convert them to a list of AddCertificationViewModel
-                var experience = profile.Experience.Select(x => ViewModelFromExperience(x)).ToList(); //Get the experience from the profile and convert them to a list of ExperienceViewModel
-
-                var result = new TalentProfileViewModel
+                if (profile != null)
                 {
-                    Id = profile.Id,
-                    FirstName = profile.FirstName,
-                    MiddleName = profile.MiddleName,
-                    LastName = profile.LastName,
-                    Gender = profile.Gender,
-                    Email = profile.Email,
-                    Phone = profile.Phone,
-                    MobilePhone = profile.MobilePhone,
-                    IsMobilePhoneVerified = profile.IsMobilePhoneVerified,
-                    Address = profile.Address,
-                    Nationality = profile.Nationality,
-                    VisaStatus = profile.VisaStatus,
-                    VisaExpiryDate = profile.VisaExpiryDate,
-                    ProfilePhoto = profile.ProfilePhoto,
-                    ProfilePhotoUrl = ProfilePhotoUrl,
-                    VideoName = profile.VideoName,
-                    VideoUrl = videoUrl,
-                    CvName = profile.CvName,
-                    CvUrl = cvUrl,
-                    Summary = profile.Summary,
-                    Description = profile.Description,
-                    LinkedAccounts = profile.LinkedAccounts,
-                    JobSeekingStatus = profile.JobSeekingStatus,
-                    Languages = languages,
-                    Skills = skills,
-                    Education = education,
-                    Certifications = certifications,
-                    Experience = experience
-                };
-                return result;
+                    videoUrl = string.IsNullOrWhiteSpace(profile.VideoName) //Check if the videoName is null or empty
+                              ? "" //If it is null or empty, set the videoUrl to empty
+                              : await _fileService.GetFileURL(profile.VideoName, FileType.UserVideo); //If it is not null or empty, get the videoUrl from the fileService
+                    cvUrl = string.IsNullOrWhiteSpace(profile.CvName) //Check if the cvName is null or empty
+                              ? "" //If it is null or empty, set the cvUrl to empty
+                              : await _fileService.GetFileURL(profile.CvName, FileType.UserCV); //If it is not null or empty, get the cvUrl from the fileService
+                    ProfilePhotoUrl = string.IsNullOrWhiteSpace(profile.ProfilePhoto) //Check if the ProfilePhoto is null or empty
+                                ? "" //If it is null or empty, set the ProfilePhotoUrl to empty
+                                : await _fileService.GetFileURL(profile.ProfilePhoto, FileType.ProfilePhoto);
+                    //: profile.ProfilePhotoUrl; //If it is not null or empty, get the ProfilePhotoUrl from the fileService
+
+                    var skills = profile.Skills.Select(x => ViewModelFromSkill(x)).ToList(); //Get the skills from the profile and convert them to a list of AddSkillViewModel
+                    var languages = profile.Languages.Select(x => ViewModelFromLanguage(x, Id)).ToList(); //Get the languages from the profile and convert them to a list of AddLanguageViewModel
+                    var education = profile.Education.Select(x => ViewModelFromEducation(x)).ToList(); //Get the education from the profile and convert them to a list of AddEducationViewModel
+                    var certifications = profile.Certifications.Select(x => ViewModelFromCertification(x)).ToList(); //Get the certifications from the profile and convert them to a list of AddCertificationViewModel
+                    var experience = profile.Experience.Select(x => ViewModelFromExperience(x)).ToList(); //Get the experience from the profile and convert them to a list of ExperienceViewModel
+
+                    var result = new TalentProfileViewModel
+                    {
+                        Id = profile.Id,
+                        FirstName = profile.FirstName,
+                        MiddleName = profile.MiddleName,
+                        LastName = profile.LastName,
+                        Gender = profile.Gender,
+                        Email = profile.Email,
+                        Phone = profile.Phone,
+                        MobilePhone = profile.MobilePhone,
+                        IsMobilePhoneVerified = profile.IsMobilePhoneVerified,
+                        Address = profile.Address,
+                        Nationality = profile.Nationality,
+                        VisaStatus = profile.VisaStatus,
+                        VisaExpiryDate = profile.VisaExpiryDate,
+                        ProfilePhoto = profile.ProfilePhoto,
+                        ProfilePhotoUrl = ProfilePhotoUrl,
+                        VideoName = profile.VideoName,
+                        VideoUrl = videoUrl,
+                        CvName = profile.CvName,
+                        CvUrl = cvUrl,
+                        Summary = profile.Summary,
+                        Description = profile.Description,
+                        LinkedAccounts = profile.LinkedAccounts,
+                        JobSeekingStatus = profile.JobSeekingStatus,
+                        Languages = languages,
+                        Skills = skills,
+                        Education = education,
+                        Certifications = certifications,
+                        Experience = experience
+                    };
+                    return result;
+                }
+                return null;
             }
-            return null;
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
         public async Task<bool> UpdateTalentProfile(TalentProfileViewModel model, string updaterId)
@@ -414,36 +421,43 @@ namespace Talent.Services.Profile.Domain.Services
             var fileExtension = Path.GetExtension(file.FileName);
             List<string> acceptedExtensions = new List<string> { ".jpg", ".png", ".gif", ".jpeg" };
 
-            if (fileExtension != null && !acceptedExtensions.Contains(fileExtension.ToLower()))
+            try
             {
-                return false;
-            }
-
-            var profile = (await _userRepository.Get(x => x.Id == talentId)).SingleOrDefault();
-
-            if (profile == null)
-            {
-                return false;
-            }
-
-            var newFileName = await _fileService.SaveFile(file, FileType.ProfilePhoto);
-
-            if (!string.IsNullOrWhiteSpace(newFileName))
-            {
-                var oldFileName = profile.ProfilePhoto;
-
-                if (!string.IsNullOrWhiteSpace(oldFileName))
+                if (fileExtension != null && !acceptedExtensions.Contains(fileExtension.ToLower()))
                 {
-                    await _fileService.DeleteFile(oldFileName, FileType.ProfilePhoto);
+                    return false;
                 }
 
-                profile.ProfilePhoto = newFileName;
-                profile.ProfilePhotoUrl = await _fileService.GetFileURL(newFileName, FileType.ProfilePhoto);
+                var profile = (await _userRepository.Get(x => x.Id == talentId)).SingleOrDefault();
 
-                await _userRepository.Update(profile);
-                return true;
+                if (profile == null)
+                {
+                    return false;
+                }
+
+                var newFileName = await _fileService.SaveFile(file, FileType.ProfilePhoto);
+
+                if (!string.IsNullOrWhiteSpace(newFileName))
+                {
+                    var oldFileName = profile.ProfilePhoto;
+
+                    if (!string.IsNullOrWhiteSpace(oldFileName))
+                    {
+                        await _fileService.DeleteFile(oldFileName, FileType.ProfilePhoto);
+                    }
+
+                    profile.ProfilePhoto = newFileName;
+                    profile.ProfilePhotoUrl = await _fileService.GetFileURL(newFileName, FileType.ProfilePhoto);
+
+                    await _userRepository.Update(profile);
+                    return true;
+                }
+                return false;
             }
-            return false;
+            catch (Exception e)
+            {
+                return false;
+            }
         }
 
         public async Task<bool> AddTalentVideo(string talentId, IFormFile file)
@@ -473,9 +487,11 @@ namespace Talent.Services.Profile.Domain.Services
 
         public async Task<IEnumerable<TalentSnapshotViewModel>> GetTalentSnapshotList(string employerOrJobId, bool forJob, int position, int increment)
         {
+            //Code by @Patrick Zou for Advanced Task Modoule2
             //Your code here;
             //throw new NotImplementedException();
-            try {
+            try
+            {
                 var employer = await _employerRepository.GetByIdAsync(employerOrJobId);
                 var talentList = _userRepository.Collection.Skip(position).Take(increment).AsEnumerable();
                 var videoUrl = ""; //Initialize the videoUrl variable
